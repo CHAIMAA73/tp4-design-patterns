@@ -9,6 +9,52 @@
 Identifier, pour chaque situation, le design pattern adapté, établir son diagramme
 de classes puis l'implémenter en Java.
 
+## Sommaire
+
+1. [Exercice 1](#exercice-1)
+  - [1.1 Figures — Composite](#11-figures--pattern-composite)
+  - [1.2 Plugin — Template Method + Factory](#12-plugin--template-method--factory)
+  - [1.3 Composant — Decorator](#13-composant--pattern-decorator)
+  - [1.4 Joueur — Observer](#14-joueur--pattern-observer)
+2. [Exercice 2 : Framework de traitement d'images](#exercice-2--framework-de-traitement-dimages)
+  - [Question 1 : Diagramme de classes](#question-1--diagramme-de-classes)
+  - [Question 2 : Implémentation Java](#question-2--implémentation-java)
+  - [Question 3 : Application cliente](#question-3--application-cliente)
+3. [Conclusion](#conclusion)
+
+## Structure du projet
+
+```
+tp-design-patterns/
+├── pom.xml
+├── README.md
+├── captures/                         captures d'écran des exécutions
+└── src/main/java/ma/enset/
+    ├── exercice1/
+    │   ├── composite/   Figure, Cercle, Rectangle, Groupe, MainComposite
+    │   ├── plugin/      Plugin, PluginImpl1, PluginImpl2, PluginFactory, MainPlugin
+    │   ├── decorator/   Composant, ComposantImpl, Decorateur, DecorateurLog, DecorateurChrono, MainDecorator
+    │   └── observer/    Observable, Observer, Joueur, Couloir, Camera, Gardien, MainObserver
+    └── exercice2/
+        ├── framework/   Filtre, Compresseur, ImageProcessor           (le framework)
+        ├── adapter/     ImplNonStandard, ImplNonStandardAdapter       (ancienne implémentation adaptée)
+        ├── impl/        FiltreNegatif, FiltreSeuil, CompressionRLE, CompressionEchantillonnage
+        ├── tests/       TestFiltres, TestAdapter, TestCompression, TestImageProcessor
+        └── app/         Application                                   (application cliente)
+```
+
+## Exécution
+
+Ouvrir le projet dans IntelliJ IDEA (projet Maven), puis lancer la classe voulue :
+
+| Partie | Classe à exécuter |
+|---|---|
+| Exercice 1.1 | `ma.enset.exercice1.composite.MainComposite` |
+| Exercice 1.2 | `ma.enset.exercice1.plugin.MainPlugin` |
+| Exercice 1.3 | `ma.enset.exercice1.decorator.MainDecorator` |
+| Exercice 1.4 | `ma.enset.exercice1.observer.MainObserver` |
+| Exercice 2 (tests) | Classes du package `ma.enset.exercice2.tests` |
+| Exercice 2 (application) | `ma.enset.exercice2.app.Application` |
 ## Exercice 1
 
 ### 1.1 Figures — pattern Composite
@@ -540,3 +586,23 @@ Au revoir !
 | `FiltreSeuil:100` + `CompressionEchantillonnage` | Binarisation puis compression avec perte (12 → 6 éléments) |
 | Classe inexistante | Erreur « classe introuvable » |
 | Compresseur saisi à la place d'un filtre | Erreur « n'est pas un(e) Filtre » grâce à la vérification du type |
+
+## Conclusion
+
+Ce TP m'a permis de mettre en pratique plusieurs design patterns et de comprendre à quel
+problème de conception chacun répond :
+
+| Pattern | Problème résolu | Où ? |
+|---|---|---|
+| **Composite** | Traiter de la même façon un objet simple et un groupe d'objets | Ex. 1.1 |
+| **Template Method** | Fixer le squelette d'un algorithme en laissant des étapes variables | Ex. 1.2, Ex. 2 (compression) |
+| **Factory** (réflexion) | Créer un objet sans connaître sa classe à la compilation | Ex. 1.2, Ex. 2 (application) |
+| **Decorator** | Ajouter des comportements sans modifier le code existant | Ex. 1.3 |
+| **Observer** | Notifier plusieurs objets d'un changement avec un couplage faible | Ex. 1.4 |
+| **Strategy** | Rendre un algorithme interchangeable, même à l'exécution | Ex. 2 (filtrage) |
+| **Adapter** | Réutiliser une classe dont l'interface est incompatible | Ex. 2 (`ImplNonStandard`) |
+
+Dans l'exercice 2, la combinaison de **Strategy**, **Adapter**, **Template Method** et de
+l'**instanciation dynamique** donne un framework **fermé à la modification et ouvert à
+l'extension** : l'utilisateur ajoute ses propres traitements simplement en écrivant de
+nouvelles classes, sans modifier une seule ligne du framework.
