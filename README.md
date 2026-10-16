@@ -301,3 +301,40 @@ classDiagram
 - **Strategy** — Context : `ImageProcessor` · Strategy : `Filtre` · ConcreteStrategy : `FiltreNegatif`, `FiltreSeuil`, `ImplNonStandardAdapter`
 - **Adapter** (adaptateur objet) — Target : `Filtre` · Adapter : `ImplNonStandardAdapter` · Adaptee : `ImplNonStandard`
 - **Template Method** — AbstractClass : `Compresseur` · ConcreteClass : `CompressionRLE`, `CompressionEchantillonnage`
+
+### Question 2 : Implémentation Java
+
+#### a) Strategy — le filtrage
+
+L'interface `Filtre` est le contrat que doit respecter toute opération de filtrage.
+Chaque filtre est une stratégie concrète ; l'utilisateur peut en écrire de nouvelles sans
+modifier le framework.
+
+```java
+public interface Filtre {
+    int[] filter(int[] data);
+}
+```
+
+Exemple de stratégie concrète :
+
+```java
+public class FiltreNegatif implements Filtre {
+    @Override
+    public int[] filter(int[] data) {
+        int[] resultat = new int[data.length];
+        for (int i = 0; i < data.length; i++) {
+            resultat[i] = 255 - data[i];
+        }
+        return resultat;
+    }
+}
+```
+
+Implémentations fournies :
+- `FiltreNegatif` : négatif de l'image (`255 - pixel`)
+- `FiltreSeuil` : binarisation noir/blanc selon un seuil
+
+**Test (`TestFiltres`) :**
+
+![Strategy](captures/ex2-strategy.png)
