@@ -439,3 +439,104 @@ modification et ouvert à l'extension**.
 l'ancienne implémentation via l'adaptateur) et de compresseur pendant l'exécution.
 
 ![Framework](captures/ex2-framework.png)
+
+### Question 3 : Application cliente
+
+L'application affiche un menu : l'utilisateur **saisit le nom complet des classes** à utiliser.
+Elles sont instanciées dynamiquement par **réflexion** (`Class.forName`), puis l'utilisateur
+peut filtrer et compresser l'image et **changer d'implémentation à tout moment**.
+
+Syntaxe acceptée : `NomDeLaClasse` ou `NomDeLaClasse:parametre` (le paramètre est passé à un
+constructeur qui prend un `String`, par exemple `FiltreSeuil:100` ou
+`ImplNonStandardAdapter:INVERSE`).
+
+```java
+static <T> T creer(String saisie, Class<T> type) throws Exception {
+    String[] parties = saisie.split(":", 2);
+    Class<?> c = Class.forName(parties[0]);
+    if (!type.isAssignableFrom(c)) {
+        throw new IllegalArgumentException(c.getName() + " n'est pas un(e) " + type.getSimpleName());
+    }
+    Object instance = parties.length == 2
+            ? c.getConstructor(String.class).newInstance(parties[1])
+            : c.getDeclaredConstructor().newInstance();
+    return type.cast(instance);
+}
+```
+
+La méthode vérifie que la classe saisie est bien du type attendu (`Filtre` ou `Compresseur`).
+Les erreurs (classe introuvable, mauvais type, aucun filtre choisi) sont affichées sans
+arrêter le programme.
+
+Pour ajouter un nouveau filtre, il suffit d'écrire une classe qui implémente `Filtre` et de
+saisir son nom : **aucune ligne du framework n'est modifiée**.
+
+**Exécution — scénario complet :**
+
+J'ai retiré le menu répété entre chaque choix pour rendre la sortie plus lisible.
+
+```
+=== Framework de traitement d'images ===
+Image : [10, 10, 10, 200, 200, 90, 90, 90, 90, 255, 255, 30]
+
+Votre choix : 5
+Erreur : Aucune implémentation de filtrage n'est définie
+
+Votre choix : 1
+Classe du filtre : ma.enset.exercice2.impl.FiltreNegatif
+Filtre actif : FiltreNegatif
+
+Votre choix : 2
+Classe du compresseur : ma.enset.exercice2.impl.CompressionRLE
+Compresseur actif : CompressionRLE
+
+Votre choix : 5
+   [FiltreNegatif] application du négatif
+Après filtrage    : [245, 245, 245, 55, 55, 165, 165, 165, 165, 0, 0, 225]
+   [Compresseur] 12 -> 10 éléments (gain 16,7 %)
+Après compression : [3, 245, 2, 55, 4, 165, 2, 0, 1, 225]
+
+Votre choix : 1
+Classe du filtre : ma.enset.exercice2.adapter.ImplNonStandardAdapter:INVERSE
+Filtre actif : ImplNonStandardAdapter
+
+Votre choix : 3
+   [ImplNonStandard] filtre 'INVERSE' appliqué
+Résultat : [30, 255, 255, 90, 90, 90, 90, 200, 200, 10, 10, 10]
+
+Votre choix : 1
+Classe du filtre : ma.enset.exercice2.impl.FiltreSeuil:100
+Filtre actif : FiltreSeuil
+
+Votre choix : 2
+Classe du compresseur : ma.enset.exercice2.impl.CompressionEchantillonnage
+Compresseur actif : CompressionEchantillonnage
+
+Votre choix : 5
+   [FiltreSeuil] binarisation avec seuil = 100
+Après filtrage    : [0, 0, 0, 255, 255, 0, 0, 0, 0, 255, 255, 0]
+   [Compresseur] 12 -> 6 éléments (gain 50,0 %)
+Après compression : [0, 0, 255, 0, 0, 255]
+
+Votre choix : 1
+Classe du filtre : ma.enset.Inexistant
+Erreur : classe introuvable -> ma.enset.Inexistant
+
+Votre choix : 1
+Classe du filtre : ma.enset.exercice2.impl.CompressionRLE
+Erreur : ma.enset.exercice2.impl.CompressionRLE n'est pas un(e) Filtre
+
+Votre choix : 0
+Au revoir !
+```
+
+**Ce que montre cette exécution :**
+
+| Étape | Résultat |
+|---|---|
+| Traitement sans filtre choisi | Erreur gérée, le programme continue |
+| `FiltreNegatif` + `CompressionRLE` | Négatif de l'image puis compression sans perte (12 → 10 éléments) |
+| Passage à `ImplNonStandardAdapter:INVERSE` | **Changement dynamique** vers l'ancienne implémentation, via l'adaptateur |
+| `FiltreSeuil:100` + `CompressionEchantillonnage` | Binarisation puis compression avec perte (12 → 6 éléments) |
+| Classe inexistante | Erreur « classe introuvable » |
+| Compresseur saisi à la place d'un filtre | Erreur « n'est pas un(e) Filtre » grâce à la vérification du type |

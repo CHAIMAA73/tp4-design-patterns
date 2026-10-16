@@ -43,3 +43,5 @@ out/
 *.iml
 .vscode/
 .DS_Store
+hs_err_pid*
+*.jfr
