@@ -61,3 +61,55 @@ classDiagram
 **Résultat de l'exécution :**
 
 ![Composite](captures/composite.png)
+
+### 1.2 Plugin — Template Method + Factory
+
+**Situation :** une opération implémente le squelette d'un algorithme dont deux parties
+sont variables ; le développeur implémente ces parties, et l'application cliente doit
+instancier un plugin sans connaître sa classe concrète.
+
+**Justification :**
+- **Template Method** : `operation()` (déclarée `final`) fixe l'ordre des étapes et appelle
+  les méthodes abstraites `partie1()` et `partie2()` que les sous-classes redéfinissent.
+- **Factory** : `PluginFactory` crée l'instance à partir du *nom* de la classe (réflexion
+  avec `Class.forName`). Le client ne manipule que le type abstrait `Plugin`.
+
+| Rôle | Classe |
+|---|---|
+| AbstractClass | `Plugin` |
+| ConcreteClass | `PluginImpl1`, `PluginImpl2` |
+| Factory | `PluginFactory` |
+| Client | `MainPlugin` |
+
+```mermaid
+classDiagram
+    class Plugin {
+        <<abstract>>
+        +operation() final
+        #partie1()*
+        #partie2()*
+    }
+    class PluginImpl1 {
+        #partie1()
+        #partie2()
+    }
+    class PluginImpl2 {
+        #partie1()
+        #partie2()
+    }
+    class PluginFactory {
+        +createPlugin(className : String)$ Plugin
+    }
+    class MainPlugin {
+        +main(args)$
+    }
+    Plugin <|-- PluginImpl1
+    Plugin <|-- PluginImpl2
+    PluginFactory ..> Plugin : crée
+    MainPlugin ..> PluginFactory : utilise
+    MainPlugin ..> Plugin : utilise
+```
+
+**Résultat de l'exécution :**
+
+![Plugin](captures/plugin.png)
