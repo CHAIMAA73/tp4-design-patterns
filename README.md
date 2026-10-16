@@ -113,3 +113,52 @@ classDiagram
 **Résultat de l'exécution :**
 
 ![Plugin](captures/plugin.png)
+
+### 1.3 Composant — pattern Decorator
+
+**Situation :** ajouter des responsabilités à un composant (des traitements avant et après
+`traitement()`) sans modifier son code source.
+
+**Justification :** le décorateur implémente la même interface que le composant et contient
+une référence vers un `Composant`. Il exécute son propre traitement avant et après, puis
+délègue au composant enveloppé. Les décorateurs peuvent s'empiler librement à l'exécution :
+`new DecorateurChrono(new DecorateurLog(new ComposantImpl()))`. Contrairement à l'héritage,
+on évite de créer une sous-classe pour chaque combinaison de comportements.
+
+| Rôle | Classe |
+|---|---|
+| Component | `Composant` |
+| ConcreteComponent | `ComposantImpl` |
+| Decorator | `Decorateur` |
+| ConcreteDecorator | `DecorateurLog`, `DecorateurChrono` |
+
+```mermaid
+classDiagram
+    class Composant {
+        <<interface>>
+        +traitement()
+    }
+    class ComposantImpl {
+        +traitement()
+    }
+    class Decorateur {
+        <<abstract>>
+        #composant : Composant
+        +traitement()
+    }
+    class DecorateurLog {
+        +traitement()
+    }
+    class DecorateurChrono {
+        +traitement()
+    }
+    Composant <|.. ComposantImpl
+    Composant <|.. Decorateur
+    Decorateur o--> "1" Composant : enveloppe
+    Decorateur <|-- DecorateurLog
+    Decorateur <|-- DecorateurChrono
+```
+
+**Résultat de l'exécution :**
+
+![Decorator](captures/decorator.png)
