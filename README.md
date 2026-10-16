@@ -162,3 +162,60 @@ classDiagram
 **Résultat de l'exécution :**
 
 ![Decorator](captures/decorator.png)
+
+### 1.4 Joueur — pattern Observer
+
+**Situation :** le Couloir, la Caméra et le Gardien doivent être informés à chaque
+changement du score du joueur, tout en gardant un couplage faible.
+
+**Justification :** `Joueur` (le sujet observable) garde une liste d'observateurs et ne
+connaît que l'interface `Observer`. Les objets de l'environnement s'abonnent avec
+`subscribe()` et sont notifiés automatiquement dans `setScore()`. On peut ajouter un nouvel
+observateur ou en retirer un (`unsubscribe()`) sans modifier la classe `Joueur`.
+
+| Rôle | Classe |
+|---|---|
+| Subject | `Observable` |
+| ConcreteSubject | `Joueur` |
+| Observer | `Observer` |
+| ConcreteObserver | `Couloir`, `Camera`, `Gardien` |
+
+```mermaid
+classDiagram
+    class Observable {
+        <<interface>>
+        +subscribe(o : Observer)
+        +unsubscribe(o : Observer)
+        +notifyObservers()
+    }
+    class Observer {
+        <<interface>>
+        +update(o : Observable)
+    }
+    class Joueur {
+        -nom : String
+        -score : int
+        -observers : List~Observer~
+        +setScore(score : int)
+        +getScore() int
+        +getNom() String
+    }
+    class Couloir {
+        +update(o : Observable)
+    }
+    class Camera {
+        +update(o : Observable)
+    }
+    class Gardien {
+        +update(o : Observable)
+    }
+    Observable <|.. Joueur
+    Observer <|.. Couloir
+    Observer <|.. Camera
+    Observer <|.. Gardien
+    Joueur o--> "*" Observer : notifie
+```
+
+**Résultat de l'exécution :**
+
+![Observer](captures/observer.png)
