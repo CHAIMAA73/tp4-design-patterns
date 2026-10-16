@@ -410,3 +410,32 @@ Implémentations fournies :
 **Test (`TestCompression`) :**
 
 ![Template Method](captures/ex2-template.png)
+
+#### d) ImageProcessor — le point d'entrée du framework
+
+`ImageProcessor` joue le rôle de **Context** du pattern Strategy. Il contient un `Filtre` et un
+`Compresseur` (des abstractions) et délègue les deux opérations du framework :
+`filter(int[] data)` et `compresser(int[] data)`. Les setters permettent de **changer
+dynamiquement** d'implémentation à l'exécution.
+
+```java
+public class ImageProcessor {
+    private Filtre filtre;
+    private Compresseur compresseur;
+
+    public int[] filter(int[] data)     { return filtre.filter(data); }
+    public int[] compresser(int[] data) { return compresseur.compresser(data); }
+
+    public void setFiltre(Filtre filtre)                { this.filtre = filtre; }
+    public void setCompresseur(Compresseur compresseur) { this.compresseur = compresseur; }
+}
+```
+
+`ImageProcessor` ne fait référence à aucune classe concrète : on peut ajouter de nouveaux
+filtres ou de nouvelles compressions sans le modifier. Le framework est donc **fermé à la
+modification et ouvert à l'extension**.
+
+**Test (`TestImageProcessor`)** : le même objet `ImageProcessor` change de filtre (y compris
+l'ancienne implémentation via l'adaptateur) et de compresseur pendant l'exécution.
+
+![Framework](captures/ex2-framework.png)
