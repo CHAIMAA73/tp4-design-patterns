@@ -219,3 +219,85 @@ classDiagram
 **Résultat de l'exécution :**
 
 ![Observer](captures/observer.png)
+
+## Exercice 2 : Framework de traitement d'images
+
+### Analyse des exigences
+
+| Exigence | Pattern | Mise en œuvre |
+|---|---|---|
+| Fermé à la modification, ouvert à l'extension | Principe OCP | Le framework ne dépend que d'abstractions (`Filtre`, `Compresseur`) |
+| Le filtrage peut évoluer ; l'utilisateur crée ses propres filtres | **Strategy** | Interface `Filtre` + implémentations `FiltreNegatif`, `FiltreSeuil` |
+| Changer dynamiquement de filtre à l'exécution | **Strategy** | `ImageProcessor.setFiltre(...)` |
+| Réutiliser `ImplNonStandard.appliquerFiltre(String, int[])` | **Adapter** | `ImplNonStandardAdapter implements Filtre` |
+| Squelette de la compression, détails dans les sous-classes | **Template Method** | `Compresseur.compresser()` (final) appelle `compresserDonnees()` (abstraite) |
+| Choix des classes par l'utilisateur | Réflexion | `Class.forName(nom)` |
+
+### Question 1 : Diagramme de classes
+
+```mermaid
+classDiagram
+    direction LR
+
+    class ImageProcessor {
+        -filtre : Filtre
+        -compresseur : Compresseur
+        +filter(data : int[]) int[]
+        +compresser(data : int[]) int[]
+        +setFiltre(f : Filtre)
+        +setCompresseur(c : Compresseur)
+    }
+
+    class Filtre {
+        <<interface>>
+        +filter(data : int[]) int[]
+    }
+    class FiltreNegatif {
+        +filter(data : int[]) int[]
+    }
+    class FiltreSeuil {
+        -seuil : int
+        +filter(data : int[]) int[]
+    }
+
+    class ImplNonStandardAdapter {
+        -filterName : String
+        +filter(data : int[]) int[]
+    }
+    class ImplNonStandard {
+        +appliquerFiltre(filterName : String, data : int[]) int[]
+    }
+
+    class Compresseur {
+        <<abstract>>
+        +compresser(data : int[]) int[]
+        #preparer(data : int[]) int[]
+        #compresserDonnees(data : int[]) int[]*
+    }
+    class CompressionRLE {
+        #compresserDonnees(data : int[]) int[]
+    }
+    class CompressionEchantillonnage {
+        #compresserDonnees(data : int[]) int[]
+    }
+
+    class Application {
+        +main(args)$
+    }
+
+    ImageProcessor o--> Filtre : strategy
+    ImageProcessor o--> Compresseur : template
+    Filtre <|.. FiltreNegatif
+    Filtre <|.. FiltreSeuil
+    Filtre <|.. ImplNonStandardAdapter
+    ImplNonStandardAdapter --> ImplNonStandard : adapte
+    Compresseur <|-- CompressionRLE
+    Compresseur <|-- CompressionEchantillonnage
+    Application ..> ImageProcessor : utilise
+```
+
+**Rôles des patterns :**
+
+- **Strategy** — Context : `ImageProcessor` · Strategy : `Filtre` · ConcreteStrategy : `FiltreNegatif`, `FiltreSeuil`, `ImplNonStandardAdapter`
+- **Adapter** (adaptateur objet) — Target : `Filtre` · Adapter : `ImplNonStandardAdapter` · Adaptee : `ImplNonStandard`
+- **Template Method** — AbstractClass : `Compresseur` · ConcreteClass : `CompressionRLE`, `CompressionEchantillonnage`
