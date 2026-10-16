@@ -338,3 +338,40 @@ Implémentations fournies :
 **Test (`TestFiltres`) :**
 
 ![Strategy](captures/ex2-strategy.png)
+
+#### b) Adapter — réutiliser l'ancienne implémentation
+
+L'ancienne classe `ImplNonStandard` propose `appliquerFiltre(String filterName, int[] data)`,
+une signature incompatible avec l'interface `Filtre` du framework (nom différent et paramètre
+supplémentaire). Plutôt que de la modifier, on crée un adaptateur qui implémente `Filtre` et
+traduit l'appel `filter(data)` en `appliquerFiltre(filterName, data)`. Le nom du filtre est
+fourni à la construction de l'adaptateur.
+
+| Rôle | Classe |
+|---|---|
+| Target | `Filtre` |
+| Adapter | `ImplNonStandardAdapter` |
+| Adaptee | `ImplNonStandard` |
+
+```java
+public class ImplNonStandardAdapter implements Filtre {
+    private final ImplNonStandard implNonStandard = new ImplNonStandard();
+    private final String filterName;
+
+    public ImplNonStandardAdapter(String filterName) {
+        this.filterName = filterName;
+    }
+
+    @Override
+    public int[] filter(int[] data) {
+        return implNonStandard.appliquerFiltre(filterName, data);
+    }
+}
+```
+
+Il s'agit d'un **adaptateur objet** (par composition) : l'adaptateur contient une instance de
+l'ancienne classe au lieu d'en hériter.
+
+**Test (`TestAdapter`) :**
+
+![Adapter](captures/ex2-adapter.png)
