@@ -375,3 +375,38 @@ l'ancienne classe au lieu d'en hériter.
 **Test (`TestAdapter`) :**
 
 ![Adapter](captures/ex2-adapter.png)
+
+#### c) Template Method — la compression
+
+La classe abstraite `Compresseur` définit le squelette de l'algorithme de compression dans la
+méthode `compresser()`, déclarée `final` pour que l'ordre des étapes ne puisse pas être modifié.
+Seule l'étape `compresserDonnees()` est abstraite et déléguée aux sous-classes.
+
+| Étape | Visibilité | Rôle |
+|---|---|---|
+| `verifier(data)` | `private` | Étape commune fixe : refuse une image nulle |
+| `preparer(data)` | `protected` | Hook : copie des données, redéfinissable |
+| `compresserDonnees(data)` | `protected abstract` | Étape variable, implémentée par les sous-classes |
+| `afficherTaux(...)` | `private` | Étape commune fixe : affiche le gain |
+
+```java
+public abstract class Compresseur {
+    public final int[] compresser(int[] data) {
+        verifier(data);
+        int[] copie = preparer(data);
+        int[] resultat = compresserDonnees(copie);
+        afficherTaux(data, resultat);
+        return resultat;
+    }
+
+    protected abstract int[] compresserDonnees(int[] data);
+}
+```
+
+Implémentations fournies :
+- `CompressionRLE` : Run-Length Encoding, compression sans perte (`[5,5,5,7,7]` → `[3,5,2,7]`)
+- `CompressionEchantillonnage` : compression avec perte, conserve un pixel sur deux
+
+**Test (`TestCompression`) :**
+
+![Template Method](captures/ex2-template.png)
